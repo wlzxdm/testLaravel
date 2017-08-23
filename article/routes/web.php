@@ -14,3 +14,17 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index');
+
+// 文章首页
+Route::get('/article', 'ArticleController@index');
+Route::get('/article/index', 'ArticleController@index');
+// 添加文章
+Route::any('/article/add', 'ArticleController@add');
+// 修改文章
+Route::any('/article/update/{id}', 'ArticleController@update');
+// 删除文章
+Route::any('/article/del/{id}', 'ArticleController@delete');
