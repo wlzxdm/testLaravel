@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Article;
+use Dotenv\Validator;
 use Illuminate\Http\Request;
 
 class ArticleController extends Controller
@@ -36,6 +37,8 @@ class ArticleController extends Controller
                 'Article.title' => '文章标题',
                 'Article.content' => '文章内容'
             ]);
+
+
 
             $data = $request->input('Article');
             $article = new Article();
@@ -101,6 +104,45 @@ class ArticleController extends Controller
         }else{
             return redirect()->back()->with('error','删除成功');
         }
+    }
+
+    public function ajaxAdd(Request $request){
+        if($request->isMethod('POST')){
+            // 数据验证
+            $this->validate($request,[
+                'Article.title' => 'required|min:5:max:100',
+                'Article.content' => 'required'
+            ],[
+                'required' => ':attribute 为必填项',
+                'min' => ':attribute 不符合最小长度',
+                'max' => ':attribute 超出最大长度'
+            ],[
+                'Article.title' => '文章标题',
+                'Article.content' => '文章内容'
+            ]);
+
+
+            $data = $request->input('Article');
+            $article = new Article();
+            $article->title = $data['title'];
+            $article->content = $data['content'];
+//            $article->create_at = date('Y-m-d H:i:s',time());
+
+            if($article->save()){
+                echo json_encode([
+                    'status' =>true,
+                    'msg' => '添加成功'
+                ]);
+                exit;
+            }else{
+                echo json_encode([
+                    'status'=>false,
+                    'msg' => '添加失败'
+                ]);
+                exit;
+            }
+        }
+        return view('article.ajaxAdd');
     }
 
 }

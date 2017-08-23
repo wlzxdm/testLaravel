@@ -83,7 +83,7 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-offset-2 col-sm-10">
-									<button type="submit" class="btn btn-primary">提交</button>
+									<button type="button" class="btn btn-primary">ajax提交</button>
 								</div>
 							</div>
 						</form>
@@ -109,11 +109,43 @@
 <script src="{{ asset('js/bootstrap.min.js') }}"></script>
 
 <script>
-    $.validator.setDefaults({
-        submitHandler: function(form) {
-            form.submit();
-        }
-    });
+
+    $('.btn-primary').click(function(){
+        $.ajax({
+            type: 'post',
+            dataType: 'JSON',
+            data: $('form').serialize(),
+            headers: {'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')},
+            success: function(data){
+                alert(data.msg);
+                if(data.status){
+                    window.location.href = '{{ url("article/index") }}';
+				}
+            },
+            error : function (XMLHttpRequest, textStatus) {
+                var ret_code = XMLHttpRequest.status;
+                var ret_json = XMLHttpRequest.responseJSON;
+                var message = {};
+                var message_show = '';
+                for( var i in ret_json){
+                    message[i] = ret_json[i][0];
+                    message_show += message[i]+"\r\n";
+                }
+                if( ret_code == 422 ){
+                    for( var p in $('form').serializeArray()){
+                        if(message[p]){
+                            var responseObject = {status:false,message:message[p]};break;
+                        }
+                    }
+
+                }else if(textStatus == 'error') {
+                    var responseObject = {status:false,message:'请求失败'};
+                }
+//                console.log(message);
+                alert(message_show);
+            }
+        });
+	});
 
     $().ready(function() {
 		// 在键盘按下并释放及提交后验证提交表单
